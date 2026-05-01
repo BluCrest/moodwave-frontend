@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Moodwave — Your music. Every mood. Instantly organized.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --wine: #7B1D2E;
+      --burgundy: #4A0E1A;
+      --crimson: #C1272D;
+      --rose: #E8587A;
+      --cream: #F5F0E8;
+      --gold: #C9972B;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0D0608;
+      --bg2: #130A0C;
+      --bg3: #1A0D10;
+      --surface: rgba(123,29,46,0.12);
+      --surface2: rgba(123,29,46,0.2);
+      --border: rgba(193,39,45,0.2);
+      --text: #F0E8E9;
+      --text2: rgba(240,232,233,0.55);
+      --text3: rgba(240,232,233,0.3);
+      --accent: #C1272D;
+      --accent2: #E8587A;
+      --nav-bg: rgba(13,6,8,0.85);
+    }
+
+    [data-theme="light"] {
+      --bg: #FBF7F7;
+      --bg2: #F5EDED;
+      --bg3: #EDE0E0;
+      --surface: rgba(123,29,46,0.06);
+      --surface2: rgba(123,29,46,0.1);
+      --border: rgba(123,29,46,0.15);
+      --text: #1A0608;
+      --text2: rgba(26,6,8,0.55);
+      --text3: rgba(26,6,8,0.35);
+      --accent: #7B1D2E;
+      --accent2: #C1272D;
+      --nav-bg: rgba(251,247,247,0.85);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    h1, h2, h3, .syne { font-family: 'Syne', sans-serif; }
+
+    #bgCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .content { position: relative; z-index: 1; }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: var(--nav-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.4s;
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.4rem;
+      color: var(--text);
+      letter-spacing: -0.03em;
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-right { display: flex; align-items: center; gap: 2rem; }
+
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+
+    .nav-links a {
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text2);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent2); }
+
+    .theme-toggle {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.3rem;
+      display: flex;
+      gap: 0.2rem;
+    }
+
+    .toggle-btn {
+      width: 2rem;
+      height: 1.6rem;
+      border-radius: 100px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      transition: background 0.2s;
+      color: var(--text2);
+    }
+
+    .toggle-btn.active { background: var(--accent); color: white; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      padding: 1rem 2.5rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: all 0.25s;
+      display: inline-block;
+    }
+
+    .btn-primary:hover {
+      background: var(--crimson);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(193,39,45,0.35);
+    }
+
+    .btn-ghost {
+      padding: 1rem 2rem;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text2);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: inline-block;
+    }
+
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent2); }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 8rem 3rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-img {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=1600&auto=format&fit=crop&q=80');
+      background-size: cover;
+      background-position: center top;
+      opacity: 0.18;
+      filter: saturate(0.6);
+    }
+
+    [data-theme="light"] .hero-img { opacity: 0.08; }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 30%, var(--bg) 100%);
+    }
+
+    .hero-inner { position: relative; z-index: 2; max-width: 900px; }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.4rem 1rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.2s forwards;
+    }
+
+    .hero-pill::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero-h1 {
+      font-size: clamp(3.5rem, 9vw, 7.5rem);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.4s forwards;
+    }
+
+    .hero-h1 .accent { color: var(--accent); }
+    .hero-h1 .accent2 { color: var(--accent2); }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--text2);
+      max-width: 46ch;
+      line-height: 1.8;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.6s forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.8s forwards;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      margin-top: 5rem;
+      padding-top: 3rem;
+      border-top: 1px solid var(--border);
+      opacity: 0;
+      animation: fadeUp 0.8s ease 1s forwards;
+      flex-wrap: wrap;
+    }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-top: 0.3rem;
+    }
+
+    section { padding: 7rem 3rem; }
+
+    .section-eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .section-eyebrow::before {
+      content: '';
+      width: 2rem; height: 1px;
+      background: var(--accent);
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .section-body {
+      font-size: 0.95rem;
+      color: var(--text2);
+      line-height: 1.9;
+      max-width: 48ch;
+    }
+
+    .concert-strip { overflow: hidden; }
+
+    .concert-images {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 2fr;
+      height: 420px;
+      gap: 3px;
+    }
+
+    .concert-img { overflow: hidden; position: relative; }
+
+    .concert-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: saturate(0.5);
+      transition: filter 0.5s, transform 0.5s;
+    }
+
+    [data-theme="light"] .concert-img img { filter: saturate(0.6) brightness(0.9); }
+
+    .concert-img:hover img { filter: saturate(1); transform: scale(1.04); }
+
+    .concert-img-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, var(--burgundy) 0%, transparent 60%);
+      opacity: 0.6;
+    }
+
+    [data-theme="light"] .concert-img-overlay {
+      background: linear-gradient(to top, rgba(74,14,26,0.5) 0%, transparent 60%);
+    }
+
+    .concert-label {
+      position: absolute;
+      bottom: 1.5rem; left: 1.5rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5px;
+      margin-top: 5rem;
+      background: var(--border);
+    }
+
+    .how-card {
+      background: var(--bg2);
+      padding: 3rem 2.5rem;
+      transition: background 0.3s;
+    }
+
+    .how-card:hover { background: var(--bg3); }
+
+    .how-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      opacity: 0.25;
+      line-height: 1;
+      margin-bottom: 2rem;
+    }
+
+    .how-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+
+    .how-desc { font-size: 0.88rem; color: var(--text2); line-height: 1.8; }
+
+    .viz-section {
+      background: var(--bg2);
+      padding: 5rem 3rem;
+      text-align: center;
+    }
+
+    #waveCanvas {
+      width: 100%;
+      max-width: 800px;
+      height: 100px;
+      margin: 3rem auto 0;
+      display: block;
+    }
+
+    .moods-section { background: var(--bg2); }
+
+    .mood-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 3.5rem;
+    }
+
+    .mood-chip {
+      padding: 0.7rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.25s;
+      background: transparent;
+    }
+
+    .mood-chip:hover, .mood-chip.lit {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(193,39,45,0.3);
+    }
+
+    .mood-chip.lit2 {
+      background: var(--surface2);
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    .privacy-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+
+    .privacy-cards { display: flex; flex-direction: column; gap: 1rem; }
+
+    .privacy-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1.2rem;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .privacy-card:hover { border-color: var(--accent); background: var(--surface2); }
+
+    .privacy-icon {
+      width: 2.2rem; height: 2.2rem;
+      border-radius: 6px;
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.9rem;
+    }
+
+    .privacy-card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+    }
+
+    .privacy-card-desc { font-size: 0.82rem; color: var(--text2); line-height: 1.7; }
+
+    .cta-section {
+      padding: 8rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(123,29,46,0.3) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .cta-inner { position: relative; z-index: 1; }
+
+    .cta-title {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+
+    .cta-title span { color: var(--accent); }
+    .cta-sub { font-size: 1rem; color: var(--text2); margin-bottom: 3rem; }
+
+    .cta-price-tag {
+      display: inline-block;
+      margin-top: 1.5rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text3);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--text); }
+    .footer-logo span { color: var(--accent); }
+
+    .footer-links { display: flex; gap: 2rem; list-style: none; }
+
+    .footer-links a {
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text3);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--accent2); }
+
+    .footer-by { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); }
+    .footer-by a { color: var(--accent2); text-decoration: none; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      section { padding: 5rem 1.5rem; }
+      .hero { padding: 7rem 1.5rem 3rem; }
+      .privacy-section { grid-template-columns: 1fr; gap: 3rem; }
+      .concert-images { grid-template-columns: 1fr 1fr; height: 280px; }
+      footer { padding: 2rem 1.5rem; flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="content">
+
+  <nav>
+    <div class="nav-logo">Mood<span>wave</span></div>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#moods">Moods</a></li>
+        <li><a href="#privacy">Privacy</a></li>
+      </ul>
+      <div class="theme-toggle">
+        <button class="toggle-btn" id="darkBtn" onclick="setTheme('dark')">🌙</button>
+        <button class="toggle-btn" id="lightBtn" onclick="setTheme('light')">☀️</button>
+      </div>
+      <a href="https://moodwave-sibw.onrender.com/auth/spotify" class="btn-primary" style="padding:0.65rem 1.4rem;font-size:0.72rem;">Get $9</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-img"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-inner">
+      <div class="hero-pill">AI Playlist Generator · Now Live</div>
+      <h1 class="hero-h1">
+        Your music.<br>
+        Every <span class="accent">mood.</span><br>
+        <span class="accent2">Instantly</span> organized.
+      </h1>
+      <p class="hero-sub">Stop building playlists manually. Moodwave reads your music library and builds the perfect playlist for every mood — automatically, privately, in seconds.</p>
+      <div class="hero-actions">
+        <a href="https://moodwave-sibw.onrender.com/auth/spotify" class="btn-primary">Get Moodwave — $9</a>
+        <a href="#how" class="btn-ghost">See how it works</a>
+      </div>
+      <div class="hero-stats">
+        <div><div class="stat-num">10+</div><div class="stat-label">Mood categories</div></div>
+        <div><div class="stat-num">0</div><div class="stat-label">Data stored</div></div>
+        <div><div class="stat-num">$9</div><div class="stat-label">One-time only</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="concert-strip">
+    <div class="concert-images">
+      <div class="concert-img">
+        <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop&q=80" alt="Concert crowd"/>
+        <div class="concert-img-overlay"></div>
+        <div class="concert-label">Feel it live</div>
+      </div>
+      <div class="concert-img">
+        <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&auto=format&fit=crop&q=80" alt="Concert lights"/>
+        <div class="concert-img-overlay"></div>
+      </div>
+      <div class="concert-img">
+        <img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&auto=format&fit=crop&q=80" alt="Crowd energy"/>
+        <div class="concert-img-overlay"></div>
+      </div>
+      <div class="concert-img">
+        <img src="https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800&auto=format&fit=crop&q=80" alt="Music festival"/>
+        <div class="concert-img-overlay"></div>
+        <div class="concert-label">Your mood. Your music.</div>
+      </div>
+    </div>
+  </div>
+
+  <section id="how">
+    <div class="section-eyebrow reveal">How it works</div>
+    <h2 class="section-title reveal">Three steps.<br>Zero effort.</h2>
+    <div class="how-grid reveal">
+      <div class="how-card">
+        <div class="how-num">01</div>
+        <div class="how-title">Connect your library</div>
+        <p class="how-desc">Link your music account. Moodwave reads your saved tracks and listening history — nothing else.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">02</div>
+        <div class="how-title">AI maps your moods</div>
+        <p class="how-desc">Our AI analyses your tracks by energy, feel, and tempo — grouping them into playlists for every mood in your life.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">03</div>
+        <div class="how-title">Playlists appear</div>
+        <p class="how-desc">Chill. Hype. Focus. Late night. Ready in your account. Session ends — your data vanishes from our side.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="viz-section">
+    <div class="section-eyebrow" style="justify-content:center;">Live preview</div>
+    <h3 class="section-title" style="text-align:center;margin-bottom:0;">Hear the difference</h3>
+    <canvas id="waveCanvas"></canvas>
+  </div>
+
+  <section class="moods-section" id="moods">
+    <div class="section-eyebrow reveal">What gets created</div>
+    <h2 class="section-title reveal">Every mood, covered.</h2>
+    <p class="section-body reveal">From 2am introspection to pre-game hype — Moodwave builds a playlist for every version of you.</p>
+    <div class="mood-grid reveal">
+      <div class="mood-chip lit">🌙 Late Night</div>
+      <div class="mood-chip lit2">⚡ Hype</div>
+      <div class="mood-chip">🌊 Chill</div>
+      <div class="mood-chip">🎯 Focus</div>
+      <div class="mood-chip lit2">💔 Sad Hours</div>
+      <div class="mood-chip">🌅 Morning Energy</div>
+      <div class="mood-chip">🏋️ Workout</div>
+      <div class="mood-chip lit">🚗 Road Trip</div>
+      <div class="mood-chip">📚 Study Mode</div>
+      <div class="mood-chip lit2">✨ Feel Good</div>
+      <div class="mood-chip">🔥 Afrobeats Vibes</div>
+      <div class="mood-chip">🌧️ Rainy Day</div>
+    </div>
+  </section>
+
+  <section class="privacy-section" id="privacy">
+    <div>
+      <div class="section-eyebrow reveal">Built different</div>
+      <h2 class="section-title reveal">We see nothing.<br>We store nothing.</h2>
+      <p class="section-body reveal" style="margin-bottom:1.5rem;">Most tools profile you. They store your listening history and build a data portfolio on your habits. Moodwave doesn't.</p>
+      <p class="section-body reveal">Your session ends. Your data leaves with you. Every single time. Secured by WoeShield — our in-house AI threat detection layer.</p>
+    </div>
+    <div class="privacy-cards reveal">
+      <div class="privacy-card">
+        <div class="privacy-icon">🛡️</div>
+        <div>
+          <div class="privacy-card-title">WoeShield Protected</div>
+          <div class="privacy-card-desc">AI threat detection monitors every session in real time. Built by Point Woebegone.</div>
+        </div>
+      </div>
+      <div class="privacy-card">
+        <div class="privacy-icon">⏱️</div>
+        <div>
+          <div class="privacy-card-title">Session-only access</div>
+          <div class="privacy-card-desc">Data lives only for the duration of your session. Nothing persists after you leave.</div>
+        </div>
+      </div>
+      <div class="privacy-card">
+        <div class="privacy-icon">🚫</div>
+        <div>
+          <div class="privacy-card-title">Zero profiling</div>
+          <div class="privacy-card-desc">No listening history stored. No personal profiles. No data sold. Ever.</div>
+        </div>
+      </div>
+      <div class="privacy-card">
+        <div class="privacy-icon">🔐</div>
+        <div>
+          <div class="privacy-card-title">Destroyed on logout</div>
+          <div class="privacy-card-desc">Session data permanently destroyed the moment you log out.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section" id="get">
+    <div class="cta-glow"></div>
+    <div class="cta-inner reveal">
+      <div class="section-eyebrow" style="justify-content:center;margin-bottom:2rem;">Get started</div>
+      <h2 class="cta-title">Your library deserves<br>a <span>better organizer.</span></h2>
+      <p class="cta-sub">One-time purchase. No subscription. No data stored. No drama.</p>
+      <a href="https://moodwave-sibw.onrender.com/auth/spotify" class="btn-primary" style="font-size:0.9rem;padding:1.2rem 3rem;">Get Moodwave — $9</a>
+      <div class="cta-price-tag">One-time · Instant access · Privacy guaranteed · Secured by WoeShield</div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">Mood<span>wave</span></div>
+    <ul class="footer-links">
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#moods">Moods</a></li>
+      <li><a href="#privacy">Privacy</a></li>
+    </ul>
+    <div class="footer-by">A <a href="https://pointwoebegone.com">Point Woebegone</a> product · Secured by WoeShield</div>
+  </footer>
+
+</div>
+
+<script>
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('darkBtn').classList.toggle('active', theme === 'dark');
+    document.getElementById('lightBtn').classList.toggle('active', theme === 'light');
+    localStorage.setItem('mw-theme', theme);
+  }
+
+  const saved = localStorage.getItem('mw-theme') || 'dark';
+  setTheme(saved);
+
+  // BG CANVAS
+  const bgCanvas = document.getElementById('bgCanvas');
+  const bgCtx = bgCanvas.getContext('2d');
+  let particles = [];
+
+  function resizeBg() {
+    bgCanvas.width = window.innerWidth;
+    bgCanvas.height = window.innerHeight;
+  }
+  resizeBg();
+  window.addEventListener('resize', resizeBg);
+
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: Math.random() * 2 + 0.5,
+      dx: (Math.random() - 0.5) * 0.3,
+      dy: (Math.random() - 0.5) * 0.3,
+      o: Math.random() * 0.4 + 0.1
+    });
+  }
+
+  function animateBg() {
+    bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const col = isDark ? '193,39,45' : '123,29,46';
+    particles.forEach(p => {
+      p.x += p.dx; p.y += p.dy;
+      if (p.x < 0 || p.x > bgCanvas.width) p.dx *= -1;
+      if (p.y < 0 || p.y > bgCanvas.height) p.dy *= -1;
+      bgCtx.beginPath();
+      bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      bgCtx.fillStyle = `rgba(${col},${p.o})`;
+      bgCtx.fill();
+    });
+    particles.forEach((a, i) => {
+      particles.slice(i + 1).forEach(b => {
+        const dist = Math.hypot(a.x - b.x, a.y - b.y);
+        if (dist < 120) {
+          bgCtx.beginPath();
+          bgCtx.moveTo(a.x, a.y);
+          bgCtx.lineTo(b.x, b.y);
+          bgCtx.strokeStyle = `rgba(${col},${0.08 * (1 - dist / 120)})`;
+          bgCtx.lineWidth = 0.5;
+          bgCtx.stroke();
+        }
+      });
+    });
+    requestAnimationFrame(animateBg);
+  }
+  animateBg();
+
+  // WAVEFORM CANVAS
+  const wc = document.getElementById('waveCanvas');
+  const wCtx = wc.getContext('2d');
+  let wt = 0;
+
+  function sizeWave() {
+    wc.width = wc.offsetWidth * 2;
+    wc.height = 200;
+  }
+  sizeWave();
+  window.addEventListener('resize', sizeWave);
+
+  function animateWave() {
+    wCtx.clearRect(0, 0, wc.width, wc.height);
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const w = wc.width, h = wc.height, mid = h / 2;
+    const waves = [
+      { amp: 28, freq: 0.015, speed: 0.04, color: isDark ? 'rgba(193,39,45,0.9)' : 'rgba(123,29,46,0.7)', width: 2.5 },
+      { amp: 18, freq: 0.025, speed: 0.06, color: isDark ? 'rgba(232,88,122,0.5)' : 'rgba(193,39,45,0.4)', width: 1.5 },
+      { amp: 10, freq: 0.04,  speed: 0.08, color: isDark ? 'rgba(201,151,43,0.3)' : 'rgba(201,151,43,0.4)', width: 1 },
+    ];
+    waves.forEach(wave => {
+      wCtx.beginPath();
+      for (let x = 0; x <= w; x++) {
+        const y = mid + Math.sin(x * wave.freq + wt * wave.speed) * wave.amp
+                      + Math.sin(x * wave.freq * 1.5 + wt * wave.speed * 0.7) * (wave.amp * 0.4);
+        x === 0 ? wCtx.moveTo(x, y) : wCtx.lineTo(x, y);
+      }
+      wCtx.strokeStyle = wave.color;
+      wCtx.lineWidth = wave.width;
+      wCtx.stroke();
+    });
+    wt++;
+    requestAnimationFrame(animateWave);
+  }
+  animateWave();
+
+  // SCROLL REVEAL
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  reveals.forEach(r => observer.observe(r));
+
+  // MOOD CHIPS
+  document.querySelectorAll('.mood-chip').forEach(chip => {
+    chip.addEventListener('click', () => chip.classList.toggle('lit'));
+  });
+</script>
+</body>
+</html>

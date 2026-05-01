@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Moodwave — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --wine: #7B1D2E;
+      --burgundy: #4A0E1A;
+      --crimson: #C1272D;
+      --rose: #E8587A;
+      --cream: #F5F0E8;
+      --gold: #C9972B;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0D0608;
+      --bg2: #130A0C;
+      --bg3: #1A0D10;
+      --surface: rgba(123,29,46,0.12);
+      --surface2: rgba(123,29,46,0.2);
+      --border: rgba(193,39,45,0.2);
+      --text: #F0E8E9;
+      --text2: rgba(240,232,233,0.55);
+      --text3: rgba(240,232,233,0.3);
+      --accent: #C1272D;
+      --accent2: #E8587A;
+      --nav-bg: rgba(13,6,8,0.85);
+    }
+
+    [data-theme="light"] {
+      --bg: #FBF7F7;
+      --bg2: #F5EDED;
+      --bg3: #EDE0E0;
+      --surface: rgba(123,29,46,0.06);
+      --surface2: rgba(123,29,46,0.1);
+      --border: rgba(123,29,46,0.15);
+      --text: #1A0608;
+      --text2: rgba(26,6,8,0.55);
+      --text3: rgba(26,6,8,0.35);
+      --accent: #7B1D2E;
+      --accent2: #C1272D;
+      --nav-bg: rgba(251,247,247,0.85);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      transition: background 0.4s, color 0.4s;
+    }
+    h1, h2, h3, .syne { font-family: 'Syne', sans-serif; }
+
+    #bgCanvas {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0; pointer-events: none;
+    }
+    .content { position: relative; z-index: 1; }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: var(--nav-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 3rem;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.4s;
+    }
+    .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--text); letter-spacing: -0.03em; }
+    .nav-logo span { color: var(--accent); }
+    .nav-right { display: flex; align-items: center; gap: 2rem; }
+    .theme-toggle {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 100px; padding: 0.3rem; display: flex; gap: 0.2rem;
+    }
+    .toggle-btn {
+      width: 2rem; height: 1.6rem; border-radius: 100px; border: none;
+      background: transparent; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; font-size: 0.8rem;
+      transition: background 0.2s; color: var(--text2);
+    }
+    .toggle-btn.active { background: var(--accent); color: white; }
+
+    .btn-primary {
+      background: var(--accent); color: white;
+      padding: 1rem 2.5rem; font-family: 'Syne', sans-serif;
+      font-size: 0.85rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; border: none; cursor: pointer;
+      text-decoration: none; border-radius: 4px; transition: all 0.25s;
+    }
+    .btn-primary:hover { background: var(--crimson); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(193,39,45,0.35); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn-ghost {
+      padding: 1rem 2rem; font-size: 0.85rem; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text2); text-decoration: none;
+      border: 1px solid var(--border); border-radius: 4px;
+      font-family: 'Syne', sans-serif; font-weight: 500; transition: all 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent2); }
+
+    .section-eyebrow {
+      font-size: 0.68rem; letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--accent2); margin-bottom: 1.2rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .section-eyebrow::before { content: ''; width: 2rem; height: 1px; background: var(--accent); }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 700;
+      line-height: 1.1; letter-spacing: -0.02em; color: var(--text); margin-bottom: 1rem;
+    }
+
+    .tracked { letter-spacing: 0.15em; text-transform: uppercase; font-size: 0.75rem; color: var(--gold); font-family: 'DM Sans', sans-serif; font-weight: 500; }
+
+    .mood-chip {
+      padding: 0.7rem 1.5rem; border: 1px solid var(--border);
+      border-radius: 100px; font-size: 0.8rem; letter-spacing: 0.08em;
+      color: var(--text2); cursor: pointer; transition: all 0.25s; background: transparent;
+    }
+    .mood-chip:hover, .mood-chip.lit {
+      background: var(--accent); border-color: var(--accent);
+      color: white; transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(193,39,45,0.3);
+    }
+
+    .playlist-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 2rem; margin-bottom: 1.5rem;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .playlist-card:hover { border-color: var(--accent); background: var(--bg3); }
+
+    .track-row {
+      display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border); transition: background 0.2s;
+    }
+    .track-row:last-child { border-bottom: none; }
+    .track-row:hover { background: var(--surface); }
+    .track-row img { width: 48px; height: 48px; border-radius: 4px; object-fit: cover; }
+    .track-name { font-weight: 500; font-size: 0.95rem; }
+    .track-artist { color: var(--text2); font-size: 0.82rem; }
+
+    .progress-bar-wrap {
+      background: var(--border); border-radius: 2px; height: 4px; overflow: hidden; margin: 1rem 0;
+    }
+    .progress-bar-inner { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; background: var(--accent);
+      color: white; padding: 1rem 1.5rem; border-radius: 4px; z-index: 100;
+      transform: translateY(100px); opacity: 0; transition: all 0.3s;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--accent); line-height: 1; }
+    .stat-label { font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); margin-top: 0.3rem; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    section { padding: 8rem 3rem 4rem; max-width: 1200px; margin: 0 auto; }
+
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      section { padding: 7rem 1.5rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="content">
+  <nav>
+    <div class="nav-logo">Mood<span>wave</span></div>
+    <div class="nav-right">
+      <div class="theme-toggle">
+        <button class="toggle-btn" id="darkBtn" onclick="setTheme('dark')">🌙</button>
+        <button class="toggle-btn" id="lightBtn" onclick="setTheme('light')">☀️</button>
+      </div>
+      <button onclick="logout()" class="btn-ghost" style="padding:0.65rem 1.4rem;font-size:0.72rem;">Logout</button>
+    </div>
+  </nav>
+
+  <section>
+    <!-- Loading -->
+    <div id="loading" style="text-align:center;padding:4rem;">
+      <div style="color:var(--text2);">Checking authentication...</div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" style="display:none;">
+      <div id="welcome" style="margin-bottom:3rem;opacity:0;animation:fadeUp 0.7s ease 0.2s forwards;">
+        <div class="tracked" style="margin-bottom:0.5rem;">Welcome back</div>
+        <div style="display:flex;align-items:center;gap:1.5rem;">
+          <img id="user-img" src="" alt="profile" style="width:64px;height:64px;border-radius:50%;border:2px solid var(--gold);display:none;">
+          <div>
+            <h1 id="user-name" class="section-title" style="margin-bottom:0.5rem;">...</h1>
+            <div class="accent-line" style="height:2px;background:linear-gradient(90deg,var(--gold),transparent);width:60px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;opacity:0;animation:fadeUp 0.7s ease 0.4s forwards;">
+        <button onclick="buildPlaylists()" class="btn-primary" id="build-btn">⚡ Build My Playlists</button>
+        <button onclick="pushPlaylists()" class="btn-ghost" id="push-btn" style="display:none;">🚀 Push to Spotify</button>
+      </div>
+
+      <!-- Progress -->
+      <div id="progress" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:2rem;">
+        <div style="color:var(--text2);margin-bottom:0.5rem;font-size:0.9rem;">Building your mood playlists...</div>
+        <div class="progress-bar-wrap"><div class="progress-bar-inner" id="progress-bar"></div></div>
+        <div id="progress-text" style="color:var(--text3);font-size:0.8rem;margin-top:0.5rem;"></div>
+      </div>
+
+      <!-- Results -->
+      <div id="results" style="display:none;">
+        <div class="section-eyebrow" style="margin-bottom:1rem;">Your Mood Playlists</div>
+        <div id="stats" style="display:flex;gap:3rem;margin-bottom:2rem;padding-bottom:2rem;border-bottom:1px solid var(--border);flex-wrap:wrap;"></div>
+        <div id="playlists-container"></div>
+      </div>
+
+      <!-- Empty -->
+      <div id="empty" style="display:none;text-align:center;padding:4rem;opacity:0;animation:fadeUp 0.7s ease 0.4s forwards;">
+        <div style="font-size:3rem;margin-bottom:1rem;">🎧</div>
+        <div style="font-size:1.25rem;margin-bottom:0.5rem;color:var(--text);">No playlists yet</div>
+        <div style="color:var(--text2);">Click "Build My Playlists" to analyze your music</div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="border-top:1px solid var(--border);padding:3rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;max-width:1200px;margin:0 auto;">
+    <div class="nav-logo" style="font-size:1.1rem;">Mood<span>wave</span></div>
+    <div class="tracked" style="font-size:0.7rem;">A <span style="color:var(--accent2);">Point Woebegone</span> product · Secured by WoeShield</div>
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let playlistsData = null;
+  const API = window.location.origin;
+
+  // Theme
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('darkBtn').classList.toggle('active', theme === 'dark');
+    document.getElementById('lightBtn').classList.toggle('active', theme === 'light');
+    localStorage.setItem('mw-theme', theme);
+  }
+  const saved = localStorage.getItem('mw-theme') || 'dark';
+  setTheme(saved);
+
+  // BG Canvas
+  const bgCanvas = document.getElementById('bgCanvas');
+  const bgCtx = bgCanvas.getContext('2d');
+  let particles = [];
+  function resizeBg() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
+  resizeBg();
+  window.addEventListener('resize', resizeBg);
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight,
+      r: Math.random() * 2 + 0.5, dx: (Math.random() - 0.5) * 0.3, dy: (Math.random() - 0.5) * 0.3,
+      o: Math.random() * 0.4 + 0.1
+    });
+  }
+  function animateBg() {
+    bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const col = isDark ? '193,39,45' : '123,29,46';
+    particles.forEach(p => {
+      p.x += p.dx; p.y += p.dy;
+      if (p.x < 0 || p.x > bgCanvas.width) p.dx *= -1;
+      if (p.y < 0 || p.y > bgCanvas.height) p.dy *= -1;
+      bgCtx.beginPath(); bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      bgCtx.fillStyle = `rgba(${col},${p.o})`; bgCtx.fill();
+    });
+    particles.forEach((a, i) => {
+      particles.slice(i + 1).forEach(b => {
+        const dist = Math.hypot(a.x - b.x, a.y - b.y);
+        if (dist < 120) {
+          bgCtx.beginPath(); bgCtx.moveTo(a.x, a.y); bgCtx.lineTo(b.x, b.y);
+          bgCtx.strokeStyle = `rgba(${col},${0.08 * (1 - dist / 120)})`;
+          bgCtx.lineWidth = 0.5; bgCtx.stroke();
+        }
+      });
+    });
+    requestAnimationFrame(animateBg);
+  }
+  animateBg();
+
+  // Toast
+  function showToast(msg, duration = 3000) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+  }
+
+  // Check auth
+  async function checkAuth() {
+    try {
+      const res = await fetch('/auth/me');
+      const data = await res.json();
+      if (!data.spotify && !data.lastfm) { window.location.href = '/'; return; }
+      loadDashboard(data);
+    } catch { window.location.href = '/'; }
+  }
+
+  // Load dashboard
+  function loadDashboard(data) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    if (data.spotify) {
+      document.getElementById('user-name').textContent = data.spotify.name || data.spotify.id;
+      if (data.spotify.image) {
+        const img = document.getElementById('user-img');
+        img.src = data.spotify.image; img.style.display = 'block';
+      }
+    }
+  }
+
+  // Build playlists
+  async function buildPlaylists() {
+    const btn = document.getElementById('build-btn');
+    const progress = document.getElementById('progress');
+    const results = document.getElementById('results');
+    const empty = document.getElementById('empty');
+
+    btn.disabled = true; btn.textContent = 'Building...';
+    progress.style.display = 'block';
+    results.style.display = 'none';
+    empty.style.display = 'none';
+
+    try {
+      const res = await fetch('/playlist/build');
+      const data = await res.json();
+
+      progress.style.display = 'none';
+      btn.disabled = false; btn.textContent = '⚡ Build My Playlists';
+
+      if (data.success) {
+        playlistsData = data.playlists;
+        document.getElementById('stats').innerHTML = `
+          <div><div class="stat-num">${data.playlistCount}</div><div class="stat-label">Playlists Generated</div></div>
+          <div><div class="stat-num">${data.totalTracksAnalysed}</div><div class="stat-label">Tracks Analysed</div></div>
+          <div><div class="stat-num">0</div><div class="stat-label">Data Stored</div></div>
+        `;
+        renderPlaylists(data.playlists);
+        results.style.display = 'block';
+        document.getElementById('push-btn').style.display = 'inline-block';
+        showToast(`${data.playlistCount} playlists ready!`);
+      } else {
+        empty.style.display = 'block';
+        showToast(data.error || 'Failed to build playlists', 4000);
+      }
+    } catch {
+      progress.style.display = 'none';
+      btn.disabled = false; btn.textContent = '⚡ Build My Playlists';
+      showToast('Error building playlists', 4000);
+    }
+  }
+
+  // Render playlists
+  function renderPlaylists(playlists) {
+    const container = document.getElementById('playlists-container');
+    container.innerHTML = '';
+    Object.entries(playlists).forEach(([mood, tracks]) => {
+      const card = document.createElement('div');
+      card.className = 'playlist-card reveal visible';
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+          <div>
+            <h3 class="syne" style="font-size:1.25rem;font-weight:600;margin-bottom:0.25rem;">${mood}</h3>
+            <div style="color:var(--text2);font-size:0.875rem;">${tracks.length} tracks</div>
+          </div>
+          <div class="mood-chip lit">${mood}</div>
+        </div>
+        <div>
+          ${tracks.slice(0, 6).map(t => `
+            <div class="track-row">
+              <img src="${t.image || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'}" alt="${t.name}">
+              <div>
+                <div class="track-name">${t.name}</div>
+                <div class="track-artist">${t.artist}</div>
+              </div>
+            </div>
+          `).join('')}
+          ${tracks.length > 6 ? `<div style="color:var(--text3);font-size:0.875rem;text-align:center;padding:0.75rem;">+ ${tracks.length - 6} more tracks</div>` : ''}
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  // Push playlists
+  async function pushPlaylists() {
+    if (!playlistsData) return;
+    const btn = document.getElementById('push-btn');
+    btn.disabled = true; btn.textContent = 'Pushing...';
+    try {
+      const res = await fetch('/playlist/push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playlists: playlistsData })
+      });
+      const data = await res.json();
+      btn.disabled = false; btn.textContent = '🚀 Push to Spotify';
+      if (data.success) {
+        showToast(`✅ ${data.message}`);
+        data.playlists.forEach(p => setTimeout(() => window.open(p.url, '_blank'), 500));
+      } else { showToast(data.error || 'Failed to push', 4000); }
+    } catch {
+      btn.disabled = false; btn.textContent = '🚀 Push to Spotify';
+      showToast('Error pushing playlists', 4000);
+    }
+  }
+
+  // Logout
+  async function logout() {
+    await fetch('/auth/logout', { method: 'POST' });
+    window.location.href = '/';
+  }
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  reveals.forEach(r => observer.observe(r));
+
+  // Init
+  checkAuth();
+</script>
+</body>
+</html>
