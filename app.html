@@ -253,7 +253,9 @@
 
 <script>
   let playlistsData = null;
-  const API = window.location.origin;
+
+  // ── IMPORTANT: All API calls go to Render backend, not GitHub Pages ──
+  const API = 'https://moodwave-sibw.onrender.com';
 
   // Theme
   function setTheme(theme) {
@@ -311,10 +313,10 @@
     setTimeout(() => t.classList.remove('show'), duration);
   }
 
-  // Check auth
+  // Check auth — hits Render backend
   async function checkAuth() {
     try {
-      const res = await fetch('/auth/me');
+      const res = await fetch(`${API}/auth/me`, { credentials: 'include' });
       const data = await res.json();
       if (!data.spotify && !data.lastfm) { window.location.href = '/'; return; }
       loadDashboard(data);
@@ -334,7 +336,7 @@
     }
   }
 
-  // Build playlists
+  // Build playlists — hits Render backend
   async function buildPlaylists() {
     const btn = document.getElementById('build-btn');
     const progress = document.getElementById('progress');
@@ -347,7 +349,7 @@
     empty.style.display = 'none';
 
     try {
-      const res = await fetch('/playlist/build');
+      const res = await fetch(`${API}/playlist/build`, { credentials: 'include' });
       const data = await res.json();
 
       progress.style.display = 'none';
@@ -407,15 +409,16 @@
     });
   }
 
-  // Push playlists
+  // Push playlists — hits Render backend
   async function pushPlaylists() {
     if (!playlistsData) return;
     const btn = document.getElementById('push-btn');
     btn.disabled = true; btn.textContent = 'Pushing...';
     try {
-      const res = await fetch('/playlist/push', {
+      const res = await fetch(`${API}/playlist/push`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ playlists: playlistsData })
       });
       const data = await res.json();
@@ -430,9 +433,9 @@
     }
   }
 
-  // Logout
+  // Logout — hits Render backend, redirects to GitHub Pages home
   async function logout() {
-    await fetch('/auth/logout', { method: 'POST' });
+    await fetch(`${API}/auth/logout`, { method: 'POST', credentials: 'include' });
     window.location.href = '/';
   }
 
