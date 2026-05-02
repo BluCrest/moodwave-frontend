@@ -252,6 +252,14 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  let authToken = localStorage.getItem('mw-token');
+const urlParams = new URLSearchParams(window.location.search);
+const urlToken = urlParams.get('token');
+if (urlToken) {
+  authToken = urlToken;
+  localStorage.setItem('mw-token', authToken);
+  window.history.replaceState({}, document.title, window.location.pathname); // Remove token from URL
+}
   let playlistsData = null;
 
   // ── IMPORTANT: All API calls go to Render backend, not GitHub Pages ──
@@ -314,14 +322,24 @@
   }
 
   // Check auth — hits Render backend
-  async function checkAuth() {
-    try {
-      const res = await fetch(`${API}/auth/me`, { credentials: 'include' });
-      const data = await res.json();
-      if (!data.spotify && !data.lastfm) { window.location.href = '/'; return; }
-      loadDashboard(data);
-    } catch { window.location.href = '/'; }
+   async function checkAuth() {
+  if (!authToken) { window.location.href = '/'; return; }
+  try {
+    const res = await fetch(`${API}/auth/me`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    if (!data.spotify && !data.lastfm) { 
+      localStorage.removeItem('mw-token');
+      window.location.href = '/'; 
+      return; 
+    }
+    loadDashboard(data);
+  } catch { 
+    localStorage.removeItem('mw-token');
+    window.location.href = '/'; 
   }
+}
 
   // Load dashboard
   function loadDashboard(data) {
@@ -349,7 +367,9 @@
     empty.style.display = 'none';
 
     try {
-      const res = await fetch(`${API}/playlist/build`, { credentials: 'include' });
+      const res = await fetch(`${API}/playlist/build`, {
+  headers: { 'Authorization': `Bearer ${authToken}` }
+});
       const data = await res.json();
 
       progress.style.display = 'none';
@@ -416,11 +436,10 @@
     btn.disabled = true; btn.textContent = 'Pushing...';
     try {
       const res = await fetch(`${API}/playlist/push`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ playlists: playlistsData })
-      });
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+  body: JSON.stringify({ playlists: playlistsData })
+});
       const data = await res.json();
       btn.disabled = false; btn.textContent = '🚀 Push to Spotify';
       if (data.success) {
@@ -434,10 +453,14 @@
   }
 
   // Logout — hits Render backend, redirects to GitHub Pages home
-  async function logout() {
-    await fetch(`${API}/auth/logout`, { method: 'POST', credentials: 'include' });
-    window.location.href = '/';
-  }
+   async function logout() {
+  await fetch(`${API}/auth/logout`, { 
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${authToken}` }
+  });
+  localStorage.removeItem('mw-token');
+  window.location.href = '/';
+}
 
   // Scroll reveal
   const reveals = document.querySelectorAll('.reveal');
