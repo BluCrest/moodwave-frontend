@@ -299,31 +299,96 @@
     });
   }
 
-  // Push playlists
-  async function pushPlaylists() {
-    if (!playlistsData) return;
-    const btn = document.getElementById('push-btn');
-    btn.disabled = true; btn.textContent = 'Pushing...';
-    try {
-      const res = await fetch(`${API}/playlist/push`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
-        body: JSON.stringify({ playlists: playlistsData })
-      });
-      const data = await res.json();
-      btn.disabled = false; btn.textContent = '🚀 Push to Spotify';
-      if (data.success) {
-        showToast(`✅ ${data.playlists.length} playlists pushed!`);
-        data.playlists.forEach(p => setTimeout(() => window.open(p.url, '_blank'), 500));
-      } else { 
-        showToast(data.error || 'Failed to push', 4000); 
+  // Update pushPlaylists function
+async function pushPlaylists() {
+  if (!playlistsData) return;
+  const btn = document.getElementById('push-btn');
+  btn.disabled = true; btn.textContent = 'Pushing...';
+  try {
+    const res = await fetch(`${API}/playlist/push`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify({ playlists: playlistsData })
+    });
+    const data = await res.json();
+    btn.disabled = false; btn.textContent = '🚀 Push to Spotify';
+
+    if (res.ok && data.success) {
+      showToast(`✅ ${data.playlists.length} playlists pushed!`);
+      data.playlists.forEach(p => setTimeout(() => window.open(p.url, '_blank'), 500));
+    } else {
+      if (res.status === 403) {
+        showToast('Permission denied. Redirecting to re-authorize...', 4000);
+        // Redirect to backend Spotify auth to re-grant scopes
+        setTimeout(() => window.location.href = `${API}/auth/spotify`, 2000);
+      } else {
+        showToast(data.error || 'Failed to push playlists', 4000);
       }
-    } catch (err) {
-      console.error('[PUSH ERROR]', err.message);
-      btn.disabled = false; btn.textContent = '🚀 Push to Spotify';
-      showToast('Error pushing playlists', 4000);
     }
+  } catch (err) {
+    btn.disabled = false; btn.textContent = '🚀 Push to Spotify';
+    showToast('Error pushing playlists', 4000);
   }
+}
+
+// Update renderPlaylists function (adds manual save options)
+function renderPlaylists(playlists) {
+  const container = document.getElementById('playlists-container');
+  container.innerHTML = '';
+  playlists.forEach(playlist => {
+    const card = document.createElement('div');
+    card.className = 'playlist-card reveal visible';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div>
+          <h3 class="syne" style="font-size:1.25rem;font-weight:600;margin-bottom:0.25rem;">${playlist.name}</h3>
+          <div style="color:var(--text2);font-size:0.875rem;">${playlist.trackCount} tracks · ${playlist.mood}</div>
+        </div>
+        <div class="mood-chip lit">${playlist.mood}</div>
+      </div>
+      <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <button onclick="copyTrackUris('${playlist.name}')" class="btn-ghost" style="padding:0.5rem 1rem;font-size:0.75rem;">Copy Track URIs</button>
+        <button onclick="openAllTracks('${playlist.name}')" class="btn-ghost" style="padding:0.5rem 1rem;font-size:0.75rem;">Open All in Spotify</button>
+      </div>
+      <div>
+        ${playlist.tracks.slice(0, 6).map(t => `
+          <div class="track-row">
+            <img src="${t.image || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'}" alt="${t.name}">
+            <div style="flex:1;">
+              <div class="track-name">
+                <a href="${t.uri.replace('spotify:track:', 'https://open.spotify.com/track/')}" target="_blank" style="color:var(--text);text-decoration:none;">${t.name}</a>
+              </div>
+              <div class="track-artist">${t.artist}</div>
+            </div>
+            <a href="${t.uri.replace('spotify:track:', 'https://open.spotify.com/track/')}" target="_blank" style="color:var(--accent2);font-size:0.8rem;">Open</a>
+          </div>
+        `).join('')}
+        ${playlist.tracks.length > 6 ? `<div style="color:var(--text3);font-size:0.875rem;text-align:center;padding:0.75rem;">+ ${playlist.tracks.length - 6} more tracks</div>` : ''}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+// add helper functions
+function copyTrackUris(playlistName) {
+  const playlist = playlistsData.find(p => p.name === playlistName);
+  if (!playlist) return;
+  const uris = playlist.tracks.map(t => t.uri).join('\n');
+  navigator.clipboard.writeText(uris).then(() => {
+    showToast(`Copied ${playlist.tracks.length} track URIs for "${playlistName}"`);
+  }).catch(() => showToast('Failed to copy URIs'));
+}
+
+function openAllTracks(playlistName) {
+  const playlist = playlistsData.find(p => p.name === playlistName);
+  if (!playlist) return;
+  playlist.tracks.forEach((track, idx) => {
+    setTimeout(() => {
+      window.open(track.uri.replace('spotify:track:', 'https://open.spotify.com/track/'), '_blank');
+    }, idx * 300);
+  });
+  showToast(`Opening all tracks from "${playlistName}" in Spotify`);
+}
 
   // Logout
   async function logout() {
