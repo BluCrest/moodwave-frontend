@@ -379,15 +379,26 @@ function copyTrackUris(playlistName) {
   }).catch(() => showToast('Failed to copy URIs'));
 }
 
+// Fix: Open all tracks with slower delays + popup blocking detection
 function openAllTracks(playlistName) {
-  const playlist = playlistsData.find(p => p.name === playlistName);
+  const playlist = playlistsData?.find(p => p.name === playlistName);
   if (!playlist) return;
+  
+  const trackCount = playlist.tracks.length;
+  showToast(`Opening ${trackCount} tracks in Spotify. Check for blocked popups.`, 4000);
+  
   playlist.tracks.forEach((track, idx) => {
+    if (!track.uri) return;
+    const url = track.uri.replace('spotify:track:', 'https://open.spotify.com/track/');
+    
+    // 1 second delay between each open to avoid browser popup blocking
     setTimeout(() => {
-      window.open(track.uri.replace('spotify:track:', 'https://open.spotify.com/track/'), '_blank');
-    }, idx * 300);
+      const newTab = window.open(url, '_blank');
+      if (!newTab && idx === 0) {
+        showToast('Popups blocked! Click the popup icon in your address bar to allow.', 6000);
+      }
+    }, idx * 1000);
   });
-  showToast(`Opening all tracks from "${playlistName}" in Spotify`);
 }
 
   // Logout
