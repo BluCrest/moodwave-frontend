@@ -6,183 +6,57 @@
   <title>Moodwave — Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
   <style>
-    :root {
-      --wine: #7B1D2E;
-      --burgundy: #4A0E1A;
-      --crimson: #C1272D;
-      --rose: #E8587A;
-      --cream: #F5F0E8;
-      --gold: #C9972B;
-    }
-
-    [data-theme="dark"] {
-      --bg: #0D0608;
-      --bg2: #130A0C;
-      --bg3: #1A0D10;
-      --surface: rgba(123,29,46,0.12);
-      --surface2: rgba(123,29,46,0.2);
-      --border: rgba(193,39,45,0.2);
-      --text: #F0E8E9;
-      --text2: rgba(240,232,233,0.55);
-      --text3: rgba(240,232,233,0.3);
-      --accent: #C1272D;
-      --accent2: #E8587A;
-      --nav-bg: rgba(13,6,8,0.85);
-    }
-
-    [data-theme="light"] {
-      --bg: #FBF7F7;
-      --bg2: #F5EDED;
-      --bg3: #EDE0E0;
-      --surface: rgba(123,29,46,0.06);
-      --surface2: rgba(123,29,46,0.1);
-      --border: rgba(123,29,46,0.15);
-      --text: #1A0608;
-      --text2: rgba(26,6,8,0.55);
-      --text3: rgba(26,6,8,0.35);
-      --accent: #7B1D2E;
-      --accent2: #C1272D;
-      --nav-bg: rgba(251,247,247,0.85);
-    }
-
+    /* [Keep all your existing CSS exactly as-is] */
+    :root { --wine: #7B1D2E; --burgundy: #4A0E1A; --crimson: #C1272D; --rose: #E8587A; --cream: #F5F0E8; --gold: #C9972B; }
+    [data-theme="dark"] { --bg: #0D0608; --bg2: #130A0C; --bg3: #1A0D10; --surface: rgba(123,29,46,0.12); --surface2: rgba(123,29,46,0.2); --border: rgba(193,39,45,0.2); --text: #F0E8E9; --text2: rgba(240,232,233,0.55); --text3: rgba(240,232,233,0.3); --accent: #C1272D; --accent2: #E8587A; --nav-bg: rgba(13,6,8,0.85); }
+    [data-theme="light"] { --bg: #FBF7F7; --bg2: #F5EDED; --bg3: #EDE0E0; --surface: rgba(123,29,46,0.06); --surface2: rgba(123,29,46,0.1); --border: rgba(123,29,46,0.15); --text: #1A0608; --text2: rgba(26,6,8,0.55); --text3: rgba(26,6,8,0.35); --accent: #7B1D2E; --accent2: #C1272D; --nav-bg: rgba(251,247,247,0.85); }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      overflow-x: hidden;
-      transition: background 0.4s, color 0.4s;
-    }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; overflow-x: hidden; transition: background 0.4s, color 0.4s; }
     h1, h2, h3, .syne { font-family: 'Syne', sans-serif; }
-
-    #bgCanvas {
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 0; pointer-events: none;
-    }
+    #bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
     .content { position: relative; z-index: 1; }
-
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: var(--nav-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      padding: 1.2rem 3rem;
-      display: flex; align-items: center; justify-content: space-between;
-      transition: background 0.4s;
-    }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: var(--nav-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 1.2rem 3rem; display: flex; align-items: center; justify-content: space-between; transition: background 0.4s; }
     .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--text); letter-spacing: -0.03em; }
     .nav-logo span { color: var(--accent); }
     .nav-right { display: flex; align-items: center; gap: 2rem; }
-    .theme-toggle {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 100px; padding: 0.3rem; display: flex; gap: 0.2rem;
-    }
-    .toggle-btn {
-      width: 2rem; height: 1.6rem; border-radius: 100px; border: none;
-      background: transparent; cursor: pointer; display: flex;
-      align-items: center; justify-content: center; font-size: 0.8rem;
-      transition: background 0.2s; color: var(--text2);
-    }
+    .theme-toggle { background: var(--surface2); border: 1px solid var(--border); border-radius: 100px; padding: 0.3rem; display: flex; gap: 0.2rem; }
+    .toggle-btn { width: 2rem; height: 1.6rem; border-radius: 100px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background 0.2s; color: var(--text2); }
     .toggle-btn.active { background: var(--accent); color: white; }
-
-    .btn-primary {
-      background: var(--accent); color: white;
-      padding: 1rem 2.5rem; font-family: 'Syne', sans-serif;
-      font-size: 0.85rem; font-weight: 600; letter-spacing: 0.1em;
-      text-transform: uppercase; border: none; cursor: pointer;
-      text-decoration: none; border-radius: 4px; transition: all 0.25s;
-    }
+    .btn-primary { background: var(--accent); color: white; padding: 1rem 2.5rem; font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; text-decoration: none; border-radius: 4px; transition: all 0.25s; }
     .btn-primary:hover { background: var(--crimson); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(193,39,45,0.35); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-
-    .btn-ghost {
-      padding: 1rem 2rem; font-size: 0.85rem; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--text2); text-decoration: none;
-      border: 1px solid var(--border); border-radius: 4px;
-      font-family: 'Syne', sans-serif; font-weight: 500; transition: all 0.2s;
-    }
+    .btn-ghost { padding:1rem 2rem; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); text-decoration: none; border: 1px solid var(--border); border-radius: 4px; font-family: 'Syne', sans-serif; font-weight: 500; transition: all 0.2s; }
     .btn-ghost:hover { border-color: var(--accent); color: var(--accent2); }
-
-    .section-eyebrow {
-      font-size: 0.68rem; letter-spacing: 0.25em; text-transform: uppercase;
-      color: var(--accent2); margin-bottom: 1.2rem;
-      display: flex; align-items: center; gap: 0.8rem;
-    }
+    .section-eyebrow { font-size: 0.68rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent2); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.8rem; }
     .section-eyebrow::before { content: ''; width: 2rem; height: 1px; background: var(--accent); }
-
-    .section-title {
-      font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 700;
-      line-height: 1.1; letter-spacing: -0.02em; color: var(--text); margin-bottom: 1rem;
-    }
-
+    .section-title { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; color: var(--text); margin-bottom: 1rem; }
     .tracked { letter-spacing: 0.15em; text-transform: uppercase; font-size: 0.75rem; color: var(--gold); font-family: 'DM Sans', sans-serif; font-weight: 500; }
-
-    .mood-chip {
-      padding: 0.7rem 1.5rem; border: 1px solid var(--border);
-      border-radius: 100px; font-size: 0.8rem; letter-spacing: 0.08em;
-      color: var(--text2); cursor: pointer; transition: all 0.25s; background: transparent;
-    }
-    .mood-chip:hover, .mood-chip.lit {
-      background: var(--accent); border-color: var(--accent);
-      color: white; transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(193,39,45,0.3);
-    }
-
-    .playlist-card {
-      background: var(--bg2); border: 1px solid var(--border);
-      border-radius: 8px; padding: 2rem; margin-bottom: 1.5rem;
-      transition: border-color 0.3s, background 0.3s;
-    }
+    .mood-chip { padding:0.7rem 1.5rem; border: 1px solid var(--border); border-radius: 100px; font-size: 0.8rem; letter-spacing: 0.08em; color: var(--text2); cursor: pointer; transition: all 0.25s; background: transparent; }
+    .mood-chip:hover, .mood-chip.lit { background: var(--accent); border-color: var(--accent); color: white; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(193,39,45,0.3); }
+    .playlist-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin-bottom: 1.5rem; transition: border-color 0.3s, background 0.3s; }
     .playlist-card:hover { border-color: var(--accent); background: var(--bg3); }
-
-    .track-row {
-      display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0;
-      border-bottom: 1px solid var(--border); transition: background 0.2s;
-    }
+    .track-row { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border); transition: background 0.2s; }
     .track-row:last-child { border-bottom: none; }
     .track-row:hover { background: var(--surface); }
     .track-row img { width: 48px; height: 48px; border-radius: 4px; object-fit: cover; }
     .track-name { font-weight: 500; font-size: 0.95rem; }
     .track-artist { color: var(--text2); font-size: 0.82rem; }
-
-    .progress-bar-wrap {
-      background: var(--border); border-radius: 2px; height: 4px; overflow: hidden; margin: 1rem 0;
-    }
+    .progress-bar-wrap { background: var(--border); border-radius: 2px; height: 4px; overflow: hidden; margin: 1rem 0; }
     .progress-bar-inner { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
-
-    .toast {
-      position: fixed; bottom: 2rem; right: 2rem; background: var(--accent);
-      color: white; padding: 1rem 1.5rem; border-radius: 4px; z-index: 100;
-      transform: translateY(100px); opacity: 0; transition: all 0.3s;
-    }
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--accent); color: white; padding: 1rem 1.5rem; border-radius: 4px; z-index: 100; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
     .toast.show { transform: translateY(0); opacity: 1; }
-
     .stat-num { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--accent); line-height: 1; }
     .stat-label { font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3); margin-top: 0.3rem; }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(28px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
     .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
-
     section { padding: 8rem 3rem 4rem; max-width: 1200px; margin: 0 auto; }
-
-    @media (max-width: 768px) {
-      nav { padding: 1rem 1.5rem; }
-      section { padding: 7rem 1.5rem 3rem; }
-    }
+    @media (max-width: 768px) { nav { padding: 1rem 1.5rem; } section { padding: 7rem 1.5rem 3rem; } }
   </style>
 </head>
 <body>
-
 <canvas id="bgCanvas"></canvas>
-
 <div class="content">
   <nav>
     <div class="nav-logo">Mood<span>wave</span></div>
@@ -196,12 +70,10 @@
   </nav>
 
   <section>
-    <!-- Loading -->
     <div id="loading" style="text-align:center;padding:4rem;">
       <div style="color:var(--text2);">Checking authentication...</div>
     </div>
 
-    <!-- Dashboard -->
     <div id="dashboard" style="display:none;">
       <div id="welcome" style="margin-bottom:3rem;opacity:0;animation:fadeUp 0.7s ease 0.2s forwards;">
         <div class="tracked" style="margin-bottom:0.5rem;">Welcome back</div>
@@ -214,27 +86,23 @@
         </div>
       </div>
 
-      <!-- Actions -->
       <div style="display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;opacity:0;animation:fadeUp 0.7s ease 0.4s forwards;">
         <button onclick="buildPlaylists()" class="btn-primary" id="build-btn">⚡ Build My Playlists</button>
         <button onclick="pushPlaylists()" class="btn-ghost" id="push-btn" style="display:none;">🚀 Push to Spotify</button>
       </div>
 
-      <!-- Progress -->
       <div id="progress" style="display:none;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1.5rem;margin-bottom:2rem;">
         <div style="color:var(--text2);margin-bottom:0.5rem;font-size:0.9rem;">Building your mood playlists...</div>
         <div class="progress-bar-wrap"><div class="progress-bar-inner" id="progress-bar"></div></div>
         <div id="progress-text" style="color:var(--text3);font-size:0.8rem;margin-top:0.5rem;"></div>
       </div>
 
-      <!-- Results -->
       <div id="results" style="display:none;">
         <div class="section-eyebrow" style="margin-bottom:1rem;">Your Mood Playlists</div>
         <div id="stats" style="display:flex;gap:3rem;margin-bottom:2rem;padding-bottom:2rem;border-bottom:1px solid var(--border);flex-wrap:wrap;"></div>
         <div id="playlists-container"></div>
       </div>
 
-      <!-- Empty -->
       <div id="empty" style="display:none;text-align:center;padding:4rem;opacity:0;animation:fadeUp 0.7s ease 0.4s forwards;">
         <div style="font-size:3rem;margin-bottom:1rem;">🎧</div>
         <div style="font-size:1.25rem;margin-bottom:0.5rem;color:var(--text);">No playlists yet</div>
@@ -248,21 +116,18 @@
     <div class="tracked" style="font-size:0.7rem;">A <span style="color:var(--accent2);">Point Woebegone</span> product · Secured by WoeShield</div>
   </footer>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
   let authToken = localStorage.getItem('mw-token');
-const urlParams = new URLSearchParams(window.location.search);
-const urlToken = urlParams.get('token');
-if (urlToken) {
-  authToken = urlToken;
-  localStorage.setItem('mw-token', authToken);
-  window.history.replaceState({}, document.title, window.location.pathname); // Remove token from URL
-}
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlToken = urlParams.get('token');
+  if (urlToken) {
+    authToken = urlToken;
+    localStorage.setItem('mw-token', authToken);
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
   let playlistsData = null;
-
-  // ── IMPORTANT: All API calls go to Render backend, not GitHub Pages ──
   const API = 'https://moodwave-sibw.onrender.com';
 
   // Theme
@@ -275,7 +140,7 @@ if (urlToken) {
   const saved = localStorage.getItem('mw-theme') || 'dark';
   setTheme(saved);
 
-  // BG Canvas
+  // BG Canvas (unchanged)
   const bgCanvas = document.getElementById('bgCanvas');
   const bgCtx = bgCanvas.getContext('2d');
   let particles = [];
@@ -321,25 +186,27 @@ if (urlToken) {
     setTimeout(() => t.classList.remove('show'), duration);
   }
 
-  // Check auth — hits Render backend
-   async function checkAuth() {
-  if (!authToken) { window.location.href = '/'; return; }
-  try {
-    const res = await fetch(`${API}/auth/me`, {
-      headers: { 'Authorization': `Bearer ${authToken}` }
-    });
-    const data = await res.json();
-    if (!data.spotify && !data.lastfm) { 
+  // Auth check (fixed error handling)
+  async function checkAuth() {
+    if (!authToken) { window.location.href = '/'; return; }
+    try {
+      const res = await fetch(`${API}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      if (!res.ok) throw new Error(`Auth check failed: ${res.status}`);
+      const data = await res.json();
+      if (!data.spotify && !data.lastfm) { 
+        localStorage.removeItem('mw-token');
+        window.location.href = '/'; 
+        return; 
+      }
+      loadDashboard(data);
+    } catch (err) {
+      console.error('[AUTH CHECK FAILED]', err.message);
       localStorage.removeItem('mw-token');
       window.location.href = '/'; 
-      return; 
     }
-    loadDashboard(data);
-  } catch { 
-    localStorage.removeItem('mw-token');
-    window.location.href = '/'; 
   }
-}
 
   // Load dashboard
   function loadDashboard(data) {
@@ -354,7 +221,7 @@ if (urlToken) {
     }
   }
 
-  // Build playlists — hits Render backend
+  // Build playlists (fixed: stats code is INSIDE this function)
   async function buildPlaylists() {
     const btn = document.getElementById('build-btn');
     const progress = document.getElementById('progress');
@@ -368,8 +235,8 @@ if (urlToken) {
 
     try {
       const res = await fetch(`${API}/playlist/build`, {
-  headers: { 'Authorization': `Bearer ${authToken}` }
-});
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
       const data = await res.json();
 
       progress.style.display = 'none';
@@ -377,6 +244,7 @@ if (urlToken) {
 
       if (data.success) {
         playlistsData = data.playlists;
+        // FIXED: Stats code is now properly inside this block, no global data reference
         document.getElementById('stats').innerHTML = `
           <div><div class="stat-num">${data.playlistCount}</div><div class="stat-label">Playlists Generated</div></div>
           <div><div class="stat-num">${data.totalTracksAnalysed}</div><div class="stat-label">Tracks Analysed</div></div>
@@ -390,88 +258,88 @@ if (urlToken) {
         empty.style.display = 'block';
         showToast(data.error || 'Failed to build playlists', 4000);
       }
-    } catch {
+    } catch (err) {
+      console.error('[BUILD ERROR]', err.message);
       progress.style.display = 'none';
       btn.disabled = false; btn.textContent = '⚡ Build My Playlists';
       showToast('Error building playlists', 4000);
     }
   }
 
-  // Render playlists
-  // Replace existing renderPlaylists with this:
-function renderPlaylists(playlists) {
-  const container = document.getElementById('playlists-container');
-  container.innerHTML = '';
-  // NOW LOOPS OVER ARRAY (NOT OBJECT)
-  playlists.forEach(playlist => {
-    const card = document.createElement('div');
-    card.className = 'playlist-card reveal visible';
-    card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-        <div>
-          <h3 class="syne" style="font-size:1.25rem;font-weight:600;margin-bottom:0.25rem;">${playlist.name}</h3>
-          <div style="color:var(--text2);font-size:0.875rem;">${playlist.tracks.length} tracks</div>
-        </div>
-        <div class="mood-chip lit">${playlist.mood}</div>
-      </div>
-      <div>
-        ${playlist.tracks.slice(0,6).map(t => `
-          <div class="track-row">
-            <img src="${t.image || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'}" alt="${t.name}">
-            <div>
-              <div class="track-name">${t.name}</div>
-              <div class="track-artist">${t.artist}</div>
-            </div>
+  // Render playlists (fixed for array response)
+  function renderPlaylists(playlists) {
+    const container = document.getElementById('playlists-container');
+    container.innerHTML = '';
+    // Backend now returns an array of playlist objects
+    playlists.forEach(playlist => {
+      const card = document.createElement('div');
+      card.className = 'playlist-card reveal visible';
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+          <div>
+            <h3 class="syne" style="font-size:1.25rem;font-weight:600;margin-bottom:0.25rem;">${playlist.name}</h3>
+            <div style="color:var(--text2);font-size:0.875rem;">${playlist.trackCount} tracks</div>
           </div>
-        `).join('')}
-        ${playlist.tracks.length > 6 ? `<div style="color:var(--text3);font-size:0.875rem;text-align:center;padding:0.75rem;">+ ${playlist.tracks.length - 6} more tracks</div>` : ''}
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
+          <div class="mood-chip lit">${playlist.mood}</div>
+        </div>
+        <div>
+          ${playlist.tracks.slice(0,6).map(t => `
+            <div class="track-row">
+              <img src="${t.image || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'}" alt="${t.name}">
+              <div>
+                <div class="track-name">${t.name}</div>
+                <div class="track-artist">${t.artist}</div>
+              </div>
+            </div>
+          `).join('')}
+          ${playlist.tracks.length > 6 ? `<div style="color:var(--text3);font-size:0.875rem;text-align:center;padding:0.75rem;">+ ${playlist.tracks.length - 6} more tracks</div>` : ''}
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
 
-// Replace stats section in buildPlaylists function with this:
-document.getElementById('stats').innerHTML = `
-  <div><div class="stat-num">${data.playlistCount}</div><div class="stat-label">Playlists Generated</div></div>
-  <div><div class="stat-num">${data.totalTracksAnalysed}</div><div class="stat-label">Tracks Analysed</div></div>
-  <div><div class="stat-num">0</div><div class="stat-label">Data Stored</div></div>
-`;
-
-  // Push playlists — hits Render backend
+  // Push playlists
   async function pushPlaylists() {
     if (!playlistsData) return;
     const btn = document.getElementById('push-btn');
     btn.disabled = true; btn.textContent = 'Pushing...';
     try {
       const res = await fetch(`${API}/playlist/push`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
-  body: JSON.stringify({ playlists: playlistsData })
-});
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+        body: JSON.stringify({ playlists: playlistsData })
+      });
       const data = await res.json();
       btn.disabled = false; btn.textContent = '🚀 Push to Spotify';
       if (data.success) {
-        showToast(`✅ ${data.message}`);
+        showToast(`✅ ${data.playlists.length} playlists pushed!`);
         data.playlists.forEach(p => setTimeout(() => window.open(p.url, '_blank'), 500));
-      } else { showToast(data.error || 'Failed to push', 4000); }
-    } catch {
+      } else { 
+        showToast(data.error || 'Failed to push', 4000); 
+      }
+    } catch (err) {
+      console.error('[PUSH ERROR]', err.message);
       btn.disabled = false; btn.textContent = '🚀 Push to Spotify';
       showToast('Error pushing playlists', 4000);
     }
   }
 
-  // Logout — hits Render backend, redirects to GitHub Pages home
-   async function logout() {
-  await fetch(`${API}/auth/logout`, { 
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${authToken}` }
-  });
-  localStorage.removeItem('mw-token');
-  window.location.href = '/';
-}
+  // Logout
+  async function logout() {
+    try {
+      await fetch(`${API}/auth/logout`, { 
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+    } catch (err) {
+      console.error('[LOGOUT ERROR]', err.message);
+    }
+    localStorage.removeItem('mw-token');
+    window.location.href = '/';
+  }
 
-  // Scroll reveal
+  // Scroll reveal (unchanged)
   const reveals = document.querySelectorAll('.reveal');
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
