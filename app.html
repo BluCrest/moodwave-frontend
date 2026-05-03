@@ -398,36 +398,45 @@ if (urlToken) {
   }
 
   // Render playlists
-  function renderPlaylists(playlists) {
-    const container = document.getElementById('playlists-container');
-    container.innerHTML = '';
-    Object.entries(playlists).forEach(([mood, tracks]) => {
-      const card = document.createElement('div');
-      card.className = 'playlist-card reveal visible';
-      card.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-          <div>
-            <h3 class="syne" style="font-size:1.25rem;font-weight:600;margin-bottom:0.25rem;">${mood}</h3>
-            <div style="color:var(--text2);font-size:0.875rem;">${tracks.length} tracks</div>
-          </div>
-          <div class="mood-chip lit">${mood}</div>
-        </div>
+  // Replace existing renderPlaylists with this:
+function renderPlaylists(playlists) {
+  const container = document.getElementById('playlists-container');
+  container.innerHTML = '';
+  // NOW LOOPS OVER ARRAY (NOT OBJECT)
+  playlists.forEach(playlist => {
+    const card = document.createElement('div');
+    card.className = 'playlist-card reveal visible';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
         <div>
-          ${tracks.slice(0, 6).map(t => `
-            <div class="track-row">
-              <img src="${t.image || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'}" alt="${t.name}">
-              <div>
-                <div class="track-name">${t.name}</div>
-                <div class="track-artist">${t.artist}</div>
-              </div>
-            </div>
-          `).join('')}
-          ${tracks.length > 6 ? `<div style="color:var(--text3);font-size:0.875rem;text-align:center;padding:0.75rem;">+ ${tracks.length - 6} more tracks</div>` : ''}
+          <h3 class="syne" style="font-size:1.25rem;font-weight:600;margin-bottom:0.25rem;">${playlist.name}</h3>
+          <div style="color:var(--text2);font-size:0.875rem;">${playlist.tracks.length} tracks</div>
         </div>
-      `;
-      container.appendChild(card);
-    });
-  }
+        <div class="mood-chip lit">${playlist.mood}</div>
+      </div>
+      <div>
+        ${playlist.tracks.slice(0,6).map(t => `
+          <div class="track-row">
+            <img src="${t.image || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>'}" alt="${t.name}">
+            <div>
+              <div class="track-name">${t.name}</div>
+              <div class="track-artist">${t.artist}</div>
+            </div>
+          </div>
+        `).join('')}
+        ${playlist.tracks.length > 6 ? `<div style="color:var(--text3);font-size:0.875rem;text-align:center;padding:0.75rem;">+ ${playlist.tracks.length - 6} more tracks</div>` : ''}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// Replace stats section in buildPlaylists function with this:
+document.getElementById('stats').innerHTML = `
+  <div><div class="stat-num">${data.playlistCount}</div><div class="stat-label">Playlists Generated</div></div>
+  <div><div class="stat-num">${data.totalTracksAnalysed}</div><div class="stat-label">Tracks Analysed</div></div>
+  <div><div class="stat-num">0</div><div class="stat-label">Data Stored</div></div>
+`;
 
   // Push playlists — hits Render backend
   async function pushPlaylists() {
