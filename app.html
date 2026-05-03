@@ -6,11 +6,11 @@
   <title>Moodwave — Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
   <style>
-    /* [All your existing CSS is unchanged, keep as-is] */
+    /* [Keep your existing CSS; minimal tweaks added below] */
     :root { --wine: #7B1D2E; --burgundy: #4A0E1A; --crimson: #C1272D; --rose: #E8587A; --cream: #F5F0E8; --gold: #C9972B; }
     [data-theme="dark"] { --bg: #0D0608; --bg2: #130A0C; --bg3: #1A0D10; --surface: rgba(123,29,46,0.12); --surface2: rgba(123,29,46,0.2); --border: rgba(193,39,45,0.2); --text: #F0E8E9; --text2: rgba(240,232,233,0.55); --text3: rgba(240,232,233,0.3); --accent: #C1272D; --accent2: #E8587A; --nav-bg: rgba(13,6,8,0.85); }
-    [data-theme="light"] { --bg: #FBF7F7; --bg2: #F5EDED; --bg3: #EDE0E0; --surface: rgba(123,29,46,0.06); --surface2: rgba(123,29,46,0.1); --border: rgba(123,29,46,0.15); --text: #1A0608; --text2: rgba(26,6,8,0.55); --text3: rgba(26,6,8,0.35); --accent: #7B1D2E; --accent2: #C1272D; --nav-bg: rgba(251,247,247,0.85); }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [data-theme="light"] { --bg: #F6F7F9; --bg2: #FFFFFF; --bg3: #F0F2F3; --surface: rgba(123,29,46,0.06); --surface2: rgba(123,29,46,0.1); --border: rgba(123,29,46,0.15); --text: #1A1A1A; --text2: rgba(26,6,8,0.55); --text3: rgba(26,6,8,0.35); --accent: #7B1D2E; --accent2: #C1272D; --nav-bg: rgba(251,247,247,0.85); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; overflow-x: hidden; transition: background 0.4s, color 0.4s; }
     h1, h2, h3, .syne { font-family: 'Syne', sans-serif; }
@@ -25,7 +25,6 @@
     .toggle-btn.active { background: var(--accent); color: white; }
     .btn-primary { background: var(--accent); color: white; padding: 1rem 2.5rem; font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; text-decoration: none; border-radius: 4px; transition: all 0.25s; }
     .btn-primary:hover { background: var(--crimson); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(193,39,45,0.35); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
     .btn-ghost { padding:1rem 2rem; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); text-decoration: none; border: 1px solid var(--border); border-radius: 4px; font-family: 'Syne', sans-serif; font-weight: 500; transition: all 0.2s; }
     .btn-ghost:hover { border-color: var(--accent); color: var(--accent2); }
     .section-eyebrow { font-size: 0.68rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent2); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.8rem; }
@@ -51,8 +50,6 @@
     @keyframes fadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
     .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
     .reveal.visible { opacity: 1; transform: translateY(0); }
-    section { padding: 8rem 3rem 4rem; max-width: 1200px; margin: 0 auto; }
-    @media (max-width: 768px) { nav { padding: 1rem 1.5rem; } section { padding: 7rem 1.5rem 3rem; } }
   </style>
 </head>
 <body>
@@ -69,7 +66,7 @@
     </div>
   </nav>
 
-  <section>
+  <section id="auth">
     <div id="loading" style="text-align:center;padding:4rem;">
       <div style="color:var(--text2);">Checking authentication...</div>
     </div>
@@ -86,7 +83,7 @@
         </div>
       </div>
 
-      <div style="display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;opacity:0;animation:fadeUp 0.7s ease 0.4s forwards;">
+      <div style="display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;opacity:0;animation:fadeUp 0.4s ease 0.4s forwards;">
         <button onclick="buildPlaylists()" class="btn-primary" id="build-btn">⚡ Build My Playlists</button>
         <button onclick="pushPlaylists()" class="btn-ghost" id="push-btn" style="display:none;">🚀 Push to Spotify</button>
       </div>
@@ -116,6 +113,7 @@
     <div class="tracked" style="font-size:0.7rem;">A <span style="color:var(--accent2);">Point Woebegone</span> product · Secured by WoeShield</div>
   </footer>
 </div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -130,15 +128,30 @@
   let playlistsData = null;
   const API = 'https://moodwave-sibw.onrender.com';
 
-  // Escape HTML to prevent broken strings/special characters
+  // Escape HTML
   function escapeHtml(text) {
     if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
   }
 
-  // Theme
+  // Request headers with a fresh ID
+  function apiHeaders() {
+    const rid = 'req_' + Math.random().toString(36).slice(2,9) + '_' + Date.now().toString(36);
+    return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}`, 'X-Request-Id': rid };
+  }
+
+  // Global error surfaces
+  window.onerror = function (msg, src, line, col, err) {
+    console.error('[GlobalError]', msg, src, line, col, err);
+    showToast('An unexpected error occurred');
+  };
+  window.addEventListener('unhandledrejection', function (e) {
+    console.error('[UnhandledRejection]', e.reason);
+    showToast('Unhandled rejection: ' + (e.reason?.message || e.reason));
+  });
+
   function setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     document.getElementById('darkBtn').classList.toggle('active', theme === 'dark');
@@ -148,7 +161,7 @@
   const saved = localStorage.getItem('mw-theme') || 'dark';
   setTheme(saved);
 
-  // BG Canvas (unchanged)
+  // BG canvas
   const bgCanvas = document.getElementById('bgCanvas');
   const bgCtx = bgCanvas.getContext('2d');
   let particles = [];
@@ -156,11 +169,7 @@
   resizeBg();
   window.addEventListener('resize', resizeBg);
   for (let i = 0; i < 60; i++) {
-    particles.push({
-      x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight,
-      r: Math.random() * 2 + 0.5, dx: (Math.random() - 0.5) * 0.3, dy: (Math.random() - 0.5) * 0.3,
-      o: Math.random() * 0.4 + 0.1
-    });
+    particles.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, r: Math.random()*2+0.5, dx: (Math.random()-0.5)*0.3, dy: (Math.random()-0.5)*0.3, o: Math.random()*0.4+0.1 });
   }
   function animateBg() {
     bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
@@ -170,16 +179,15 @@
       p.x += p.dx; p.y += p.dy;
       if (p.x < 0 || p.x > bgCanvas.width) p.dx *= -1;
       if (p.y < 0 || p.y > bgCanvas.height) p.dy *= -1;
-      bgCtx.beginPath(); bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      bgCtx.beginPath(); bgCtx.arc(p.x, p.y, p.r, 0, Math.PI*2);
       bgCtx.fillStyle = `rgba(${col},${p.o})`; bgCtx.fill();
     });
     particles.forEach((a, i) => {
-      particles.slice(i + 1).forEach(b => {
+      particles.slice(i+1).forEach(b => {
         const dist = Math.hypot(a.x - b.x, a.y - b.y);
         if (dist < 120) {
           bgCtx.beginPath(); bgCtx.moveTo(a.x, a.y); bgCtx.lineTo(b.x, b.y);
-          bgCtx.strokeStyle = `rgba(${col},${0.08 * (1 - dist / 120)})`;
-          bgCtx.lineWidth = 0.5; bgCtx.stroke();
+          bgCtx.strokeStyle = `rgba(${col},${0.08*(1 - dist/120)})`; bgCtx.lineWidth = 0.5; bgCtx.stroke();
         }
       });
     });
@@ -187,7 +195,7 @@
   }
   animateBg();
 
-  // Toast
+  // Toast helper
   function showToast(msg, duration = 3000) {
     const t = document.getElementById('toast');
     t.textContent = msg; t.classList.add('show');
@@ -198,25 +206,22 @@
   async function checkAuth() {
     if (!authToken) { window.location.href = '/'; return; }
     try {
-      const res = await fetch(`${API}/auth/me`, {
-        headers: { 'Authorization': `Bearer ${authToken}` }
-      });
-      if (!res.ok) throw new Error(`Auth check failed: ${res.status}`);
+      const res = await fetch(`${API}/auth/me`, { headers: apiHeaders() });
+      if (!res.ok) throw new Error(`Auth failed: ${res.status}`);
       const data = await res.json();
-      if (!data.spotify && !data.lastfm) { 
+      if (!data.spotify && !data.lastfm) {
         localStorage.removeItem('mw-token');
-        window.location.href = '/'; 
-        return; 
+        window.location.href = '/';
+        return;
       }
       loadDashboard(data);
     } catch (err) {
-      console.error('[AUTH CHECK FAILED]', err.message);
+      console.error('[AUTH ERROR]', err?.message);
       localStorage.removeItem('mw-token');
-      window.location.href = '/'; 
+      window.location.href = '/';
     }
   }
 
-  // Load dashboard
   function loadDashboard(data) {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
@@ -229,32 +234,73 @@
     }
   }
 
-  // Build playlists
+  async function renderPlaylists(playlists) {
+    // Simple rendering helper (kept for backward compatibility)
+    const container = document.getElementById('playlists-container');
+    container.innerHTML = '';
+    playlists.forEach((playlist, idx) => {
+      const card = document.createElement('div');
+      card.className = 'playlist-card reveal visible';
+      const name = escapeHtml(playlist.name);
+      const mood = escapeHtml(playlist.mood);
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <div>
+            <h3 class="syne" style="font-size:1.25rem;font-weight:600;margin-bottom:0.25rem;">${name}</h3>
+            <div style="color:var(--text2);font-size:0.875rem;">${playlist.trackCount || playlist.tracks.length} tracks · ${mood}</div>
+          </div>
+          <div class="mood-chip lit">${mood}</div>
+        </div>
+        <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
+          <button onclick="copyTrackUris(${idx})" class="btn-ghost" style="padding:0.5rem 1rem;font-size:0.75rem;">Copy Track URIs</button>
+          <button onclick="openAllTracks(${idx})" class="btn-ghost" style="padding:0.5rem 1rem;font-size:0.75rem;">Open All in Spotify</button>
+        </div>
+        <div>
+          ${playlist.tracks.slice(0,6).map(t => {
+            const tname = escapeHtml(t.name);
+            const tartist = escapeHtml(t.artist);
+            const timg = t.image || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';
+            const turl = t.uri ? t.uri.replace('spotify:track:', 'https://open.spotify.com/track/') : '#';
+            return `
+              <div class="track-row">
+                <img src="${timg}" alt="${tname}">
+                <div style="flex:1;">
+                  <div class="track-name">
+                    <a href="${turl}" target="_blank" style="color:var(--text);text-decoration:none;">${tname}</a>
+                  </div>
+                  <div class="track-artist">${tartist}</div>
+                </div>
+                <a href="${turl}" target="_blank" style="color:var(--accent2);font-size:0.8rem;">Open</a>
+              </div>
+            `;
+          }).join('')}
+          ${playlist.tracks.length > 6 ? `<div style="color:var(--text3);font-size:0.875rem;text-align:center;padding:0.75rem;">+ ${playlist.tracks.length - 6} more tracks</div>` : ''}
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  // Build/Push (safer)
   async function buildPlaylists() {
     const btn = document.getElementById('build-btn');
     const progress = document.getElementById('progress');
     const results = document.getElementById('results');
     const empty = document.getElementById('empty');
-
     btn.disabled = true; btn.textContent = 'Building...';
     progress.style.display = 'block';
     results.style.display = 'none';
     empty.style.display = 'none';
-
     try {
-      const res = await fetch(`${API}/playlist/build`, {
-        headers: { 'Authorization': `Bearer ${authToken}` }
-      });
+      const res = await fetch(`${API}/playlist/build`, { method: 'POST', headers: apiHeaders() });
       const data = await res.json();
-
       progress.style.display = 'none';
       btn.disabled = false; btn.textContent = '⚡ Build My Playlists';
-
       if (data.success) {
         playlistsData = data.playlists;
         document.getElementById('stats').innerHTML = `
           <div><div class="stat-num">${data.playlistCount}</div><div class="stat-label">Playlists Generated</div></div>
-          <div><div class="stat-num">${data.totalTracksAnalysed}</div><div class="stat-label">Tracks Analysed</div></div>
+          <div><div class="stat-num">${data.totalTracksAnalysed}</div><div class="stat-label">Tracks Analyzed</div></div>
           <div><div class="stat-num">0</div><div class="stat-label">Data Stored</div></div>
         `;
         renderPlaylists(data.playlists);
@@ -266,63 +312,35 @@
         showToast(data.error || 'Failed to build playlists', 4000);
       }
     } catch (err) {
-      console.error('[BUILD ERROR]', err.message);
+      console.error('[BUILD ERROR]', err?.message);
       progress.style.display = 'none';
       btn.disabled = false; btn.textContent = '⚡ Build My Playlists';
       showToast('Error building playlists', 4000);
     }
   }
 
-  // Fixed render playlists (uses index instead of name for onclick, escapes content)
-  function renderPlaylists(playlists) {
-    const container = document.getElementById('playlists-container');
-    container.innerHTML = '';
-    playlists.forEach((playlist, index) => {
-      const card = document.createElement('div');
-      card.className = 'playlist-card reveal visible';
-      const escapedName = escapeHtml(playlist.name);
-      const escapedMood = escapeHtml(playlist.mood);
-      const trackCount = playlist.trackCount || playlist.tracks.length;
-      
-      card.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-          <div>
-            <h3 class="syne" style="font-size:1.25rem;font-weight:600;margin-bottom:0.25rem;">${escapedName}</h3>
-            <div style="color:var(--text2);font-size:0.875rem;">${trackCount} tracks · ${escapedMood}</div>
-          </div>
-          <div class="mood-chip lit">${escapedMood}</div>
-        </div>
-        <div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
-          <button onclick="copyTrackUris(${index})" class="btn-ghost" style="padding:0.5rem 1rem;font-size:0.75rem;">Copy Track URIs</button>
-          <button onclick="openAllTracks(${index})" class="btn-ghost" style="padding:0.5rem 1rem;font-size:0.75rem;">Open All in Spotify</button>
-        </div>
-        <div>
-          ${playlist.tracks.slice(0, 6).map(t => {
-            const trackName = escapeHtml(t.name);
-            const trackArtist = escapeHtml(t.artist);
-            const trackImg = t.image || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';
-            const trackUrl = t.uri ? t.uri.replace('spotify:track:', 'https://open.spotify.com/track/') : '#';
-            return `
-              <div class="track-row">
-                <img src="${trackImg}" alt="${trackName}">
-                <div style="flex:1;">
-                  <div class="track-name">
-                    <a href="${trackUrl}" target="_blank" style="color:var(--text);text-decoration:none;">${trackName}</a>
-                  </div>
-                  <div class="track-artist">${trackArtist}</div>
-                </div>
-                <a href="${trackUrl}" target="_blank" style="color:var(--accent2);font-size:0.8rem;">Open</a>
-              </div>
-            `;
-          }).join('')}
-          ${playlist.tracks.length > 6 ? `<div style="color:var(--text3);font-size:0.875rem;text-align:center;padding:0.75rem;">+ ${playlist.tracks.length - 6} more tracks</div>` : ''}
-        </div>
-      `;
-      container.appendChild(card);
+  function copyTrackUris(index) {
+    const playlist = playlistsData?.[index];
+    if (!playlist) return;
+    const uris = playlist.tracks.map(t => t.uri).filter(Boolean).join('\n');
+    navigator.clipboard.writeText(uris).then(() => {
+      showToast(`Copied ${playlist.tracks.length} track URIs for "${playlist.name}"`);
+    }).catch(() => showToast('Failed to copy URIs'));
+  }
+  function openAllTracks(index) {
+    const playlist = playlistsData?.[index];
+    if (!playlist) return;
+    const tracks = playlist.tracks.filter(t => t.uri);
+    if (tracks.length === 0) { showToast('No tracks with Spotify URIs found', 4000); return; }
+    showToast(`Opening ${tracks.length} tracks. Check for popups...`, 4000);
+    const firstUrl = tracks[0].uri.replace('spotify:track:', 'https://open.spotify.com/track/');
+    window.open(firstUrl, '_blank');
+    tracks.slice(1).forEach((trk, idx) => {
+      const url = trk.uri.replace('spotify:track:', 'https://open.spotify.com/track/');
+      setTimeout(() => window.open(url, '_blank'), (idx + 1) * 1500);
     });
   }
 
-  // Fixed push playlists (avoids popup blocking)
   async function pushPlaylists() {
     if (!playlistsData) return;
     const btn = document.getElementById('push-btn');
@@ -330,15 +348,13 @@
     try {
       const res = await fetch(`${API}/playlist/push`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+        headers: apiHeaders(),
         body: JSON.stringify({ playlists: playlistsData })
       });
       const data = await res.json();
       btn.disabled = false; btn.textContent = '🚀 Push to Spotify';
-
       if (res.ok && data.success) {
         showToast(`✅ ${data.playlists.length} playlists pushed!`);
-        // Open first playlist immediately, others with delay to avoid popup blocking
         if (data.playlists.length > 0) {
           window.open(data.playlists[0].url, '_blank');
           data.playlists.slice(1).forEach((p, idx) => {
@@ -359,61 +375,22 @@
     }
   }
 
-  // Fixed copy track URIs (uses index instead of name)
-  function copyTrackUris(playlistIndex) {
-    const playlist = playlistsData[playlistIndex];
-    if (!playlist) return;
-    const uris = playlist.tracks.map(t => t.uri).filter(Boolean).join('\n');
-    navigator.clipboard.writeText(uris).then(() => {
-      showToast(`Copied ${playlist.tracks.length} track URIs for "${playlist.name}"`);
-    }).catch(() => showToast('Failed to copy URIs'));
-  }
-
-  // Fixed open all tracks (avoids popup blocking, uses index)
-  function openAllTracks(playlistIndex) {
-    const playlist = playlistsData?.[playlistIndex];
-    if (!playlist) return;
-    
-    const tracks = playlist.tracks.filter(t => t.uri);
-    if (tracks.length === 0) {
-      showToast('No tracks with Spotify URIs found', 4000);
-      return;
-    }
-    
-    showToast(`Opening ${tracks.length} tracks. Allow popups if prompted.`, 4000);
-    
-    // Open first track immediately (user gesture), others with 2s delays
-    const firstUrl = tracks[0].uri.replace('spotify:track:', 'https://open.spotify.com/track/');
-    window.open(firstUrl, '_blank');
-    
-    tracks.slice(1).forEach((track, idx) => {
-      const url = track.uri.replace('spotify:track:', 'https://open.spotify.com/track/');
-      setTimeout(() => window.open(url, '_blank'), (idx + 1) * 2000);
-    });
-  }
-
-  // Logout
   async function logout() {
     try {
-      await fetch(`${API}/auth/logout`, { 
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${authToken}` }
-      });
+      await fetch(`${API}/auth/logout`, { method: 'POST', headers: apiHeaders() });
     } catch (err) {
-      console.error('[LOGOUT ERROR]', err.message);
+      console.error('[LOGOUT ERROR]', err?.message);
     }
     localStorage.removeItem('mw-token');
     window.location.href = '/';
   }
 
-  // Scroll reveal
   const reveals = document.querySelectorAll('.reveal');
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
   }, { threshold: 0.12 });
   reveals.forEach(r => observer.observe(r));
 
-  // Init
   checkAuth();
 </script>
 </body>
